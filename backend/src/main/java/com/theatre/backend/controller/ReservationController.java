@@ -1,5 +1,6 @@
 package com.theatre.backend.controller;
 
+import com.theatre.backend.dto.CreateReservationRequest;
 import com.theatre.backend.entity.Reservation;
 import com.theatre.backend.service.ReservationService;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public Reservation createReservation(@RequestBody Reservation reservation) {
-        return reservationService.createReservation(reservation);
+    public Reservation createReservation(@RequestBody CreateReservationRequest request) {
+        return reservationService.createReservation(request);
     }
 }
