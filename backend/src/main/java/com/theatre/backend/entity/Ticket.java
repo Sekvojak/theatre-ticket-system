@@ -1,33 +1,29 @@
 package com.theatre.backend.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Entity
-@Table(name = "seats")
+@Table(name = "tickets")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Seat {
+public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Integer rowNumber;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "reservation_id", nullable = false)
+    private Reservation reservation;
 
-    @Column(nullable = false)
-    private Integer seatNumber;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "seat_id", nullable = false)
+    private Seat seat;
 
     @Column(nullable = false)
     private Double price;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "hall_id", nullable = false)
-    private Hall hall;
 }
