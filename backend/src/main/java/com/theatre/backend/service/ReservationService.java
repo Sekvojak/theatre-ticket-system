@@ -1,12 +1,7 @@
 package com.theatre.backend.service;
 
 import com.theatre.backend.dto.CreateReservationRequest;
-import com.theatre.backend.entity.Performance;
-import com.theatre.backend.entity.Reservation;
-import com.theatre.backend.entity.ReservationStatus;
-import com.theatre.backend.entity.Seat;
-import com.theatre.backend.entity.Ticket;
-import com.theatre.backend.entity.User;
+import com.theatre.backend.entity.*;
 import com.theatre.backend.exception.BadRequestException;
 import com.theatre.backend.exception.ConflictException;
 import com.theatre.backend.repository.PerformanceRepository;
@@ -110,6 +105,7 @@ public class ReservationService {
         applyReservationDefaults(reservation);
 
         Performance performance = reservation.getPerformance();
+        validatePerformanceStatus(performance);
 
         List<Seat> seats = seatRepository.findAllById(seatIds);
 
@@ -249,5 +245,13 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.CANCELED);
 
         return reservationRepository.save(reservation);
+    }
+
+    private void validatePerformanceStatus(Performance performance) {
+
+        if (performance.getStatus() != PerformanceStatus.SCHEDULED) {
+            throw new ConflictException("Reservation cannot be created for this performance.");
+        }
+
     }
 }
