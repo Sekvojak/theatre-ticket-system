@@ -1,6 +1,7 @@
 package com.theatre.backend.service;
 
 import com.theatre.backend.dto.CreateReservationRequest;
+import com.theatre.backend.dto.SeatAvailabilityResponse;
 import com.theatre.backend.entity.*;
 import com.theatre.backend.exception.BadRequestException;
 import com.theatre.backend.exception.ConflictException;
@@ -253,5 +254,30 @@ public class ReservationService {
             throw new ConflictException("Reservation cannot be created for this performance.");
         }
 
+    }
+
+    public List<SeatAvailabilityResponse> getSeatMap(Long performanceId) {
+
+        Performance performance = performanceRepository.findById(performanceId)
+                .orElseThrow(() -> new BadRequestException("Performance not found."));
+
+        Long hallId = performance.getHall().getId();
+
+        List<Seat> seats = seatRepository.findByHallId(hallId);
+
+        List<Long> occupiedSeats = ticketRepository
+                .findOccupiedSeatIdsByPerformanceIdAndReservationStatus(
+                        performanceId,
+                        ReservationStatus.ACTIVE
+                );
+
+        return seats.stream()
+                .map(seat -> new SeatAvailabilityResponse(
+                        seat.getId(),
+                        seat.getRowNumber(),
+                        seat.getSeatNumber(),
+                        occupiedSeats.contains(seat.getId())
+                ))
+                .toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.theatre.backend.controller;
 
+import com.theatre.backend.dto.SeatAvailabilityResponse;
 import com.theatre.backend.entity.Performance;
 import com.theatre.backend.service.PerformanceService;
 import com.theatre.backend.service.ReservationService;
@@ -42,5 +43,10 @@ public class PerformanceController {
     @GetMapping("/{id}/occupied-seats")
     public List<Long> getOccupiedSeats(@PathVariable Long id) {
         return reservationService.getOccupiedSeatIds(id);
+    }
+
+    @GetMapping("/{id}/seats")
+    public List<SeatAvailabilityResponse> getSeatMap(@PathVariable Long id) {
+        return reservationService.getSeatMap(id);
     }
 }
