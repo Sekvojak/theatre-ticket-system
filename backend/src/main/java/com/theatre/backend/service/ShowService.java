@@ -1,6 +1,7 @@
 package com.theatre.backend.service;
 
 import com.theatre.backend.entity.Show;
+import com.theatre.backend.exception.NotFoundException;
 import com.theatre.backend.repository.ShowRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,11 @@ public class ShowService {
 
     public List<Show> getAllShows() {
         return showRepository.findAll();
+    }
+
+    public Show getShowById(Long id) {
+        return showRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Show with id " + id + " not found."));
     }
 
     public Show createShow(Show show) {

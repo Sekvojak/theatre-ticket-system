@@ -21,6 +21,11 @@ public class ShowController {
         return showService.getAllShows();
     }
 
+    @GetMapping("/{id}")
+    public Show getShowById(@PathVariable Long id) {
+        return showService.getShowById(id);
+    }
+
     @PostMapping
     public Show createShow(@RequestBody Show show) {
         return showService.createShow(show);

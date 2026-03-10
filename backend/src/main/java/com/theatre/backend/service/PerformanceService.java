@@ -1,6 +1,7 @@
 package com.theatre.backend.service;
 
 import com.theatre.backend.entity.Performance;
+import com.theatre.backend.exception.NotFoundException;
 import com.theatre.backend.repository.PerformanceRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,11 @@ public class PerformanceService {
 
     public List<Performance> getAllPerformances() {
         return performanceRepository.findAll();
+    }
+
+    public Performance getPerformanceById(Long id) {
+        return performanceRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Performance with id " + id + " not found."));
     }
 
     public List<Performance> getPerformancesByShowId(Long showId) {

@@ -1,5 +1,7 @@
 package com.theatre.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +26,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonProperty(access = Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
 
