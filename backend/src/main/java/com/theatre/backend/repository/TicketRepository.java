@@ -26,4 +26,16 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("performanceId") Long performanceId,
             @Param("status") ReservationStatus status
     );
+
+    @Query("""
+        select t.seat.id
+        from Ticket t
+        where t.reservation.performance.id = :performanceId
+          and t.reservation.status = :status
+    """)
+    List<Long> findOccupiedSeatIdsByPerformanceIdAndReservationStatus(
+            @Param("performanceId") Long performanceId,
+            @Param("status") ReservationStatus status
+    );
+
 }

@@ -217,4 +217,37 @@ public class ReservationService {
     private boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
     }
+
+    public List<Long> getOccupiedSeatIds(Long performanceId) {
+        if (performanceId == null) {
+            throw new BadRequestException("Performance id must be provided.");
+        }
+
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new BadRequestException("Performance not found.");
+        }
+
+        return ticketRepository.findOccupiedSeatIdsByPerformanceIdAndReservationStatus(
+                performanceId,
+                ReservationStatus.ACTIVE);
+    }
+
+    @Transactional
+    public Reservation cancelReservation(Long reservationId) {
+
+        if (reservationId == null) {
+            throw new BadRequestException("Reservation id must be provided.");
+        }
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BadRequestException("Reservation not found."));
+
+        if (reservation.getStatus() == ReservationStatus.CANCELED) {
+            throw new ConflictException("Reservation is already cancelled.");
+        }
+
+        reservation.setStatus(ReservationStatus.CANCELED);
+
+        return reservationRepository.save(reservation);
+    }
 }

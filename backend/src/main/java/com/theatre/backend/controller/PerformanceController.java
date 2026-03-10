@@ -2,6 +2,7 @@ package com.theatre.backend.controller;
 
 import com.theatre.backend.entity.Performance;
 import com.theatre.backend.service.PerformanceService;
+import com.theatre.backend.service.ReservationService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +12,11 @@ import java.util.List;
 public class PerformanceController {
 
     private final PerformanceService performanceService;
+    private final ReservationService reservationService;
 
-    public PerformanceController(PerformanceService performanceService) {
+    public PerformanceController(PerformanceService performanceService, ReservationService reservationService) {
         this.performanceService = performanceService;
+        this.reservationService = reservationService;
     }
 
     @GetMapping
@@ -34,5 +37,10 @@ public class PerformanceController {
     @PostMapping
     public Performance createPerformance(@RequestBody Performance performance) {
         return performanceService.createPerformance(performance);
+    }
+
+    @GetMapping("/{id}/occupied-seats")
+    public List<Long> getOccupiedSeats(@PathVariable Long id) {
+        return reservationService.getOccupiedSeatIds(id);
     }
 }

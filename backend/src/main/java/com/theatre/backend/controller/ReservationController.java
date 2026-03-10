@@ -26,4 +26,9 @@ public class ReservationController {
     public Reservation createReservation(@RequestBody CreateReservationRequest request) {
         return reservationService.createReservation(request);
     }
+
+    @DeleteMapping("{id}/cancel")
+    public Reservation deleteReservation(@PathVariable Long id) {
+        return reservationService.cancelReservation(id);
+    }
 }
