@@ -300,4 +300,11 @@ public class ReservationService {
                 .seatIds(seatIds)
                 .build();
     }
+
+    public ReservationResponse getReservationById(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BadRequestException("Reservation not found"));
+
+        return mapToResponse(reservation);
+    }
 }
