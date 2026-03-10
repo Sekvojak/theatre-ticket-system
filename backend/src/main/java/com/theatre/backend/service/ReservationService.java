@@ -1,6 +1,7 @@
 package com.theatre.backend.service;
 
 import com.theatre.backend.dto.CreateReservationRequest;
+import com.theatre.backend.dto.ReservationResponse;
 import com.theatre.backend.dto.SeatAvailabilityResponse;
 import com.theatre.backend.entity.*;
 import com.theatre.backend.exception.BadRequestException;
@@ -279,5 +280,24 @@ public class ReservationService {
                         occupiedSeats.contains(seat.getId())
                 ))
                 .toList();
+    }
+
+    public ReservationResponse mapToResponse(Reservation reservation) {
+
+        List<Long> seatIds = ticketRepository.findByReservationId(reservation.getId())
+                .stream()
+                .map(ticket -> ticket.getSeat().getId())
+                .toList();
+
+        return ReservationResponse.builder()
+                .id(reservation.getId())
+                .performanceId(reservation.getPerformance().getId())
+                .status(reservation.getStatus().name())
+                .createdAt(reservation.getCreatedAt())
+                .userId(reservation.getUser() != null ? reservation.getUser().getId() : null)
+                .guestName(reservation.getGuestName())
+                .guestEmail(reservation.getGuestEmail())
+                .seatIds(seatIds)
+                .build();
     }
 }

@@ -1,6 +1,7 @@
 package com.theatre.backend.controller;
 
 import com.theatre.backend.dto.CreateReservationRequest;
+import com.theatre.backend.dto.ReservationResponse;
 import com.theatre.backend.entity.Reservation;
 import com.theatre.backend.service.ReservationService;
 import jakarta.validation.Valid;
@@ -24,8 +25,9 @@ public class ReservationController {
     }
 
     @PostMapping
-    public Reservation createReservation(@Valid @RequestBody CreateReservationRequest request) {
-        return reservationService.createReservation(request);
+    public ReservationResponse createReservation(@Valid @RequestBody CreateReservationRequest request) {
+        Reservation reservation = reservationService.createReservation(request);
+        return reservationService.mapToResponse(reservation);
     }
 
     @DeleteMapping("{id}/cancel")
