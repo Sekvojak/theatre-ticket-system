@@ -25,6 +25,11 @@ public class PerformanceController {
         return performanceService.getAllPerformances();
     }
 
+    @GetMapping("/{id}")
+    public Performance getPerformanceById(@PathVariable Long id) {
+        return performanceService.getPerformanceById(id);
+    }
+
     @GetMapping("/show/{showId}")
     public List<Performance> getPerformancesByShowId(@PathVariable Long showId) {
         return performanceService.getPerformancesByShowId(showId);
