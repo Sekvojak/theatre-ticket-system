@@ -7,6 +7,7 @@ import type {
   ReservationResponse,
   User,
   LoginResponse,
+  UserReservation,
 } from './types';
 
 const BASE = '/api';
@@ -63,6 +64,7 @@ export const reservationsApi = {
 export const usersApi = {
   getAll: () => get<User[]>('/users'),
   create: (user: { name: string; email: string; password?: string }) => post<User>('/users', user),
+  getReservations: (userId: number) => get<UserReservation[]>(`/users/${userId}/reservations`),
 };
 
 export const authApi = {

@@ -6,6 +6,8 @@ import ShowsPage from './pages/ShowsPage'
 import HowPage from './pages/HowPage'
 import ShowDetailPage from './pages/ShowDetailPage'
 import SeatMapPage from './pages/SeatMapPage'
+import MyReservationsPage from './pages/MyReservationsPage'
+import AccountPage from './pages/AccountPage'
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/shows/:showId" element={<ShowDetailPage />} />
         <Route path="/performances/:performanceId/seats" element={<SeatMapPage />} />
         <Route path="/how" element={<HowPage />} />
+        <Route path="/my-reservations" element={<MyReservationsPage />} />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppProvider>

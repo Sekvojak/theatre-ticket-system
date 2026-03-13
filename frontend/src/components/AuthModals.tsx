@@ -36,7 +36,7 @@ function LoginModal({ onClose, onSwitch }: { onClose: () => void; onSwitch: () =
     <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal">
         <button className="modal-close" onClick={onClose}>✕</button>
-        <span className="modal-logo">Theatre<span>X</span></span>
+        <span className="modal-logo">Klára</span>
         <h2>Prihlásiť sa</h2>
         <p className="modal-sub">Vitajte späť. Prihláste sa pre prístup k vašim rezerváciám.</p>
         <form onSubmit={handleSubmit}>
@@ -102,7 +102,7 @@ function RegisterModal({ onClose, onSwitch }: { onClose: () => void; onSwitch: (
     <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal">
         <button className="modal-close" onClick={onClose}>✕</button>
-        <span className="modal-logo">Theatre<span>X</span></span>
+        <span className="modal-logo">Klára</span>
         <h2>Registrácia</h2>
         <p className="modal-sub">Vytvorte si účet a sledujte históriu svojich rezervácií.</p>
         <form onSubmit={handleSubmit}>

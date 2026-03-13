@@ -1,16 +1,17 @@
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
+
 export default function Footer() {
   const navigate = useNavigate()
-  const { openLoginModal, openRegisterModal } = useApp()
+  const { user, openLoginModal, openRegisterModal } = useApp()
 
   return (
     <footer>
       <div className="footer-grid">
         <div className="footer-brand">
           <a className="logo" onClick={() => navigate('/')}>
-            Theatre<span>X</span>
+            Klára
           </a>
           <p>Moderný rezervačný systém pre divadelné predstavenia. Jednoduchá rezervácia, pohodlný nákup lístkov.</p>
         </div>
@@ -23,10 +24,14 @@ export default function Footer() {
         </div>
         <div className="footer-col">
           <h5>Účet</h5>
-          <a onClick={openLoginModal}>Prihlásenie</a>
-          <a onClick={openRegisterModal}>Registrácia</a>
-          <a>Moje rezervácie</a>
-          <a>História</a>
+          {user ? (
+            <a onClick={() => navigate('/my-reservations')}>Moje rezervácie</a>
+          ) : (
+            <>
+              <a onClick={openLoginModal}>Prihlásenie</a>
+              <a onClick={openRegisterModal}>Registrácia</a>
+            </>
+          )}
         </div>
         <div className="footer-col">
           <h5>Info</h5>
@@ -37,7 +42,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <span>© 2025 TheatreX. Všetky práva vyhradené.</span>
+        <span>© 2025 Klára. Všetky práva vyhradené.</span>
         <span>Navrhnuté pre VPSI projekt</span>
       </div>
     </footer>

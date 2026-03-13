@@ -70,3 +70,13 @@ export interface LoginResponse {
   email: string;
   role: string;
 }
+
+export interface UserReservation {
+  id: number;
+  performance: Performance;
+  status: 'ACTIVE' | 'CANCELED';
+  createdAt: string;
+  user?: User;
+  guestName?: string;
+  guestEmail?: string;
+}

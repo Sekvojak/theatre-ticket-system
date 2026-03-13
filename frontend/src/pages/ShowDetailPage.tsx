@@ -13,6 +13,8 @@ export default function ShowDetailPage() {
     (location.state as { show?: Show } | null)?.show ?? null
   )
   const [performances, setPerformances] = useState<Performance[]>([])
+  // mapa performanceId → počet voľných miest
+  const [freeSeatsMap, setFreeSeatsMap] = useState<Map<number, number>>(new Map())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -33,14 +35,24 @@ export default function ShowDetailPage() {
           if (perfs.length > 0) {
             setShow(perfs[0].show)
           } else {
-            // No performances — fetch shows list and find by id
-            // TODO: Backend should have GET /api/shows/{id}
             const allShows = await showsApi.getAll()
             const found = allShows.find(s => s.id === id)
             if (found) setShow(found)
             else setError('Predstavenie nebolo nájdené.')
           }
         }
+
+        // Načítaj obsadenosť pre každý SCHEDULED termín
+        const scheduledPerfs = sorted.filter(p => p.status === 'SCHEDULED')
+        const seatMaps = await Promise.all(
+          scheduledPerfs.map(p => performancesApi.getSeatMap(p.id))
+        )
+        const map = new Map<number, number>()
+        scheduledPerfs.forEach((p, i) => {
+          const free = seatMaps[i].filter(s => !s.occupied).length
+          map.set(p.id, free)
+        })
+        setFreeSeatsMap(map)
       } catch {
         setError('Nepodarilo sa načítať dáta. Skontrolujte, či beží backend.')
       } finally {
@@ -134,11 +146,15 @@ export default function ShowDetailPage() {
               const { day, mon } = formatDayMon(perf.startTime)
               const isCancelled = perf.status === 'CANCELLED'
               const isCompleted = perf.status === 'COMPLETED'
+              const freeSeats = freeSeatsMap.get(perf.id)
+              const isSoldOut = perf.status === 'SCHEDULED' && freeSeats === 0
+              const isClickable = perf.status === 'SCHEDULED' && !isSoldOut
               return (
                 <div
                   key={perf.id}
-                  className={`perf-card${isCancelled ? ' cancelled' : ''}`}
-                  onClick={() => handleSelectPerformance(perf)}
+                  className={`perf-card${isCancelled || isSoldOut ? ' cancelled' : ''}`}
+                  onClick={() => isClickable && handleSelectPerformance(perf)}
+                  style={isSoldOut ? { cursor: 'default' } : undefined}
                 >
                   <div className="perf-date-block">
                     <div className="day">{day}</div>
@@ -148,10 +164,16 @@ export default function ShowDetailPage() {
                     <h4>{formatDate(perf.startTime)}</h4>
                     <p>{formatTime(perf.startTime)} · {perf.hall?.name ?? 'Hlavná sála'}</p>
                   </div>
-                  <span className={`perf-status ${perf.status.toLowerCase()}`}>
-                    {perf.status === 'SCHEDULED' ? 'Voľné' : perf.status === 'CANCELLED' ? 'Zrušené' : 'Ukončené'}
+                  <span className={`perf-status ${isSoldOut ? 'soldout' : perf.status.toLowerCase()}`}>
+                    {isSoldOut
+                      ? 'Vypredané'
+                      : perf.status === 'SCHEDULED'
+                        ? `Voľné${freeSeats !== undefined ? ` (${freeSeats})` : ''}`
+                        : perf.status === 'CANCELLED'
+                          ? 'Zrušené'
+                          : 'Ukončené'}
                   </span>
-                  {!isCancelled && !isCompleted && (
+                  {isClickable && (
                     <span className="perf-arrow">→</span>
                   )}
                 </div>

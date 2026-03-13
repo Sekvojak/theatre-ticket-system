@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { User } from '../api/types';
 
-const USER_KEY = 'theatreX-user';
+const USER_KEY = 'klara-user';
 
 interface AppContextType {
   user: User | null;
