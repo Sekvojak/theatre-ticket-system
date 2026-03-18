@@ -2,17 +2,18 @@ export interface Show {
   id: number;
   title: string;
   description: string | null;
-  genre: string;
+  genres: string[];
   durationMinutes: number;
+  imageUrl?: string | null;
 }
 
 export interface Hall {
   id: number;
   name: string;
-  capacity?: number;
+  capacity: number;
 }
 
-export type PerformanceStatus = 'SCHEDULED' | 'CANCELLED' | 'COMPLETED';
+export type PerformanceStatus = 'SCHEDULED' | 'CANCELED' | 'FINISHED';
 
 export interface Performance {
   id: number;
@@ -69,6 +70,11 @@ export interface LoginResponse {
   name: string;
   email: string;
   role: string;
+  token: string;
+}
+
+export interface RegisterResponse {
+  message: string;
 }
 
 export interface UserReservation {
@@ -79,4 +85,15 @@ export interface UserReservation {
   user?: User;
   guestName?: string;
   guestEmail?: string;
+}
+
+export interface AdminReservation {
+  id: number;
+  performance: Performance;
+  user?: User;
+  guestName?: string;
+  guestEmail?: string;
+  status: 'ACTIVE' | 'CANCELED';
+  createdAt: string;
+  seatIds?: number[];
 }

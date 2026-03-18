@@ -25,11 +25,6 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
-    }
-
     @GetMapping("/{id}/reservations")
     public List<Reservation> getUserReservations(@PathVariable Long id) {
         return reservationService.getReservationsByUserId(id);

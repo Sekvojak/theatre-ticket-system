@@ -1,9 +1,12 @@
 package com.theatre.backend.service;
 
+import com.theatre.backend.entity.Performance;
 import com.theatre.backend.entity.Show;
 import com.theatre.backend.exception.NotFoundException;
+import com.theatre.backend.repository.PerformanceRepository;
 import com.theatre.backend.repository.ShowRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -11,9 +14,15 @@ import java.util.List;
 public class ShowService {
 
     private final ShowRepository showRepository;
+    private final PerformanceRepository performanceRepository;
+    private final PerformanceService performanceService;
 
-    public ShowService(ShowRepository showRepository) {
+    public ShowService(ShowRepository showRepository,
+                       PerformanceRepository performanceRepository,
+                       PerformanceService performanceService) {
         this.showRepository = showRepository;
+        this.performanceRepository = performanceRepository;
+        this.performanceService = performanceService;
     }
 
     public List<Show> getAllShows() {
@@ -27,5 +36,26 @@ public class ShowService {
 
     public Show createShow(Show show) {
         return showRepository.save(show);
+    }
+
+    @Transactional
+    public Show updateShow(Long id, Show updated) {
+        Show existing = getShowById(id);
+        existing.setTitle(updated.getTitle());
+        existing.setDescription(updated.getDescription());
+        existing.setGenres(updated.getGenres());
+        existing.setDurationMinutes(updated.getDurationMinutes());
+        existing.setImageUrl(updated.getImageUrl());
+        return showRepository.save(existing);
+    }
+
+    @Transactional
+    public void deleteShow(Long id) {
+        Show show = getShowById(id);
+        List<Performance> performances = performanceRepository.findByShowId(id);
+        for (Performance performance : performances) {
+            performanceService.deletePerformance(performance.getId());
+        }
+        showRepository.delete(show);
     }
 }
