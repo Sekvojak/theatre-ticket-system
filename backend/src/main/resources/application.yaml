@@ -17,3 +17,33 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kino.klara.notify@gmail.com
+    password: vzyaxfekaufvnkqn
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  jwt:
+    secret: dGhpcklzQVZlcnlTZWN1cmVKd3RTZWNyZXRLZXlGb3JLbGFyYVRoZWF0cmVTeXN0ZW0h
+    expiration: 86400000
+  upload:
+    dir: ./uploads/shows
+  frontend:
+    url: http://localhost:5173

@@ -22,11 +22,11 @@ export default function ShowsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const genres = ['Všetky', ...Array.from(new Set(shows.map(s => s.genre)))]
+  const genres = ['Všetky', ...Array.from(new Set(shows.flatMap(s => s.genres)))]
 
   const filteredShows = activeGenre === 'Všetky'
     ? shows
-    : shows.filter(s => s.genre === activeGenre)
+    : shows.filter(s => s.genres.includes(activeGenre))
 
   function getNextPerformance(showId: number): Performance | undefined {
     return performances
@@ -78,14 +78,20 @@ export default function ShowsPage() {
 
       <div className="shows-grid">
         {filteredShows.map(show => {
-          const cfg = getGenreConfig(show.genre)
+          const cfg = getGenreConfig(show.genres)
           const next = getNextPerformance(show.id)
           return (
             <div key={show.id} className="show-card" onClick={() => handleShowClick(show)}>
               <div className="show-poster">
-                <div className={`poster-bg ${cfg.bgClass}`} />
-                <div className="poster-icon">{cfg.icon}</div>
-                <div className="poster-tag">{show.genre}</div>
+                {show.imageUrl ? (
+                  <img src={show.imageUrl} alt={show.title} className="poster-img" />
+                ) : (
+                  <>
+                    <div className={`poster-bg ${cfg.bgClass}`} />
+                    <div className="poster-icon">{cfg.icon}</div>
+                  </>
+                )}
+                <div className="poster-tag">{show.genres.join(' · ')}</div>
               </div>
               <div className="show-body">
                 <h3>{show.title}</h3>

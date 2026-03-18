@@ -3,6 +3,9 @@ package com.theatre.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "shows")
 @Getter
@@ -22,9 +25,15 @@ public class Show {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String genre;
+    @ElementCollection
+    @CollectionTable(name = "show_genres", joinColumns = @JoinColumn(name = "show_id"))
+    @Column(name = "genre", nullable = false)
+    @Builder.Default
+    private List<String> genres = new ArrayList<>();
 
     @Column(nullable = false)
     private Integer durationMinutes;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

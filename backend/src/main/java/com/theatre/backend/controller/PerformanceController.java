@@ -4,6 +4,7 @@ import com.theatre.backend.dto.SeatAvailabilityResponse;
 import com.theatre.backend.entity.Performance;
 import com.theatre.backend.service.PerformanceService;
 import com.theatre.backend.service.ReservationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,6 +44,17 @@ public class PerformanceController {
     @PostMapping
     public Performance createPerformance(@RequestBody Performance performance) {
         return performanceService.createPerformance(performance);
+    }
+
+    @PutMapping("/{id}")
+    public Performance updatePerformance(@PathVariable Long id, @RequestBody Performance performance) {
+        return performanceService.updatePerformance(id, performance);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePerformance(@PathVariable Long id) {
+        performanceService.deletePerformance(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/occupied-seats")

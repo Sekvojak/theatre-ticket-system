@@ -38,4 +38,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("status") ReservationStatus status
     );
 
+    void deleteByReservationId(Long reservationId);
 }

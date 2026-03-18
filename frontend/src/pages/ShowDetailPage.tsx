@@ -70,7 +70,7 @@ export default function ShowDetailPage() {
     })
   }
 
-  const cfg = show ? getGenreConfig(show.genre) : { icon: '🎭', bgClass: 'drama' }
+  const cfg = show ? getGenreConfig(show.genres) : { icon: '🎭', bgClass: 'drama' }
 
   if (loading) {
     return (
@@ -100,16 +100,20 @@ export default function ShowDetailPage() {
       {/* Show info */}
       <div className="detail-grid" style={{ marginBottom: 60 }}>
         <div>
-          <div className={`detail-poster poster-bg ${cfg.bgClass}`}>
-            <span style={{ position: 'relative', zIndex: 1, fontSize: 80, opacity: 0.5 }}>
-              {cfg.icon}
-            </span>
-          </div>
+          {show.imageUrl ? (
+            <img src={show.imageUrl} alt={show.title} className="detail-poster poster-img" />
+          ) : (
+            <div className={`detail-poster poster-bg ${cfg.bgClass}`}>
+              <span style={{ position: 'relative', zIndex: 1, fontSize: 80, opacity: 0.5 }}>
+                {cfg.icon}
+              </span>
+            </div>
+          )}
         </div>
         <div className="detail-info">
           <h2>{show.title}</h2>
           <div className="detail-tags">
-            <span className="detail-tag">{show.genre}</span>
+            {show.genres.map(g => <span key={g} className="detail-tag">{g}</span>)}
           </div>
           {show.description && (
             <p className="detail-desc">{show.description}</p>
@@ -144,15 +148,15 @@ export default function ShowDetailPage() {
           <div className="performance-list">
             {performances.map(perf => {
               const { day, mon } = formatDayMon(perf.startTime)
-              const isCancelled = perf.status === 'CANCELLED'
-              const isCompleted = perf.status === 'COMPLETED'
+              const isCancelled = perf.status === 'CANCELED'
+              const isCompleted = perf.status === 'FINISHED'
               const freeSeats = freeSeatsMap.get(perf.id)
               const isSoldOut = perf.status === 'SCHEDULED' && freeSeats === 0
               const isClickable = perf.status === 'SCHEDULED' && !isSoldOut
               return (
                 <div
                   key={perf.id}
-                  className={`perf-card${isCancelled || isSoldOut ? ' cancelled' : ''}`}
+                  className={`perf-card${isCancelled || isCompleted || isSoldOut ? ' cancelled' : ''}`}
                   onClick={() => isClickable && handleSelectPerformance(perf)}
                   style={isSoldOut ? { cursor: 'default' } : undefined}
                 >
@@ -169,7 +173,7 @@ export default function ShowDetailPage() {
                       ? 'Vypredané'
                       : perf.status === 'SCHEDULED'
                         ? `Voľné${freeSeats !== undefined ? ` (${freeSeats})` : ''}`
-                        : perf.status === 'CANCELLED'
+                        : perf.status === 'CANCELED'
                           ? 'Zrušené'
                           : 'Ukončené'}
                   </span>

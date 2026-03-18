@@ -25,17 +25,20 @@ public class ReservationService {
     private final PerformanceRepository performanceRepository;
     private final TicketRepository ticketRepository;
     private final SeatRepository seatRepository;
+    private final EmailService emailService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               UserRepository userRepository,
                               PerformanceRepository performanceRepository,
                               TicketRepository ticketRepository,
-                              SeatRepository seatRepository) {
+                              SeatRepository seatRepository,
+                              EmailService emailService) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.performanceRepository = performanceRepository;
         this.ticketRepository = ticketRepository;
         this.seatRepository = seatRepository;
+        this.emailService = emailService;
     }
 
     public List<Reservation> getAllReservations() {
@@ -131,6 +134,7 @@ public class ReservationService {
                 .toList();
 
         ticketRepository.saveAll(tickets);
+        emailService.sendReservationConfirmation(savedReservation, tickets);
 
         return savedReservation;
     }
@@ -245,8 +249,9 @@ public class ReservationService {
         }
 
         reservation.setStatus(ReservationStatus.CANCELED);
-
-        return reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+        emailService.sendReservationCancellation(saved);
+        return saved;
     }
 
     private void validatePerformanceStatus(Performance performance) {

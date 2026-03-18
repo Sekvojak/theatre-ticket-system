@@ -10,8 +10,11 @@ export const GENRE_MAP: Record<string, { icon: string; bgClass: string }> = {
   'Tragedy': { icon: '🌹', bgClass: 'tragedy' },
 };
 
-export function getGenreConfig(genre: string): { icon: string; bgClass: string } {
-  return GENRE_MAP[genre] ?? { icon: '🎭', bgClass: 'drama' };
+export function getGenreConfig(genres: string[]): { icon: string; bgClass: string } {
+  for (const g of genres) {
+    if (GENRE_MAP[g]) return GENRE_MAP[g];
+  }
+  return { icon: '🎭', bgClass: 'drama' };
 }
 
 export function formatDate(iso: string): string {

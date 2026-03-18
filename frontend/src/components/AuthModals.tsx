@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { authApi, usersApi } from '../api/api'
+import { authApi } from '../api/api'
+// useApp is used only in LoginModal
 
 interface AuthModalsProps {
   loginOpen: boolean
@@ -23,7 +24,7 @@ function LoginModal({ onClose, onSwitch }: { onClose: () => void; onSwitch: () =
     setLoading(true)
     try {
       const res = await authApi.login(email, password)
-      setUser({ id: res.id, name: res.name, email: res.email, role: res.role })
+      setUser({ id: res.id, name: res.name, email: res.email, role: res.role }, res.token)
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Chyba pri prihlasovaní.')
@@ -76,26 +77,43 @@ function LoginModal({ onClose, onSwitch }: { onClose: () => void; onSwitch: () =
 }
 
 function RegisterModal({ onClose, onSwitch }: { onClose: () => void; onSwitch: () => void }) {
-  const { setUser } = useApp()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      const newUser = await usersApi.create({ name, email, password })
-      setUser(newUser)
-      onClose()
+      await authApi.register(name, email, password)
+      setDone(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Chyba pri registrácii.')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (done) {
+    return (
+      <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+        <div className="modal">
+          <button className="modal-close" onClick={onClose}>✕</button>
+          <span className="modal-logo">Klára</span>
+          <div className="verify-sent-icon">✉</div>
+          <h2>Skontrolujte email</h2>
+          <p className="modal-sub">
+            Poslali sme overovací odkaz na <strong>{email}</strong>.<br />
+            Kliknite naň a aktivujte účet. Potom sa môžete prihlásiť.
+          </p>
+          <button className="btn-form" onClick={onSwitch}>Prihlásiť sa</button>
+        </div>
+      </div>
+    )
   }
 
   return (

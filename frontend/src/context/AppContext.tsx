@@ -2,10 +2,11 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { User } from '../api/types';
 
 const USER_KEY = 'klara-user';
+const TOKEN_KEY = 'klara-token';
 
 interface AppContextType {
   user: User | null;
-  setUser: (u: User | null) => void;
+  setUser: (u: User | null, token?: string) => void;
   logout: () => void;
   cartCount: number;
   setCartCount: (n: number) => void;
@@ -32,10 +33,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
-  const setUser = (u: User | null) => {
+  const setUser = (u: User | null, token?: string) => {
     setUserState(u);
-    if (u) localStorage.setItem(USER_KEY, JSON.stringify(u));
-    else localStorage.removeItem(USER_KEY);
+    if (u) {
+      localStorage.setItem(USER_KEY, JSON.stringify(u));
+      if (token) localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(TOKEN_KEY);
+    }
   };
 
   const logout = () => setUser(null);

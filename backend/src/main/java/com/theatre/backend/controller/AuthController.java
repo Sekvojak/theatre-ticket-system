@@ -2,6 +2,8 @@ package com.theatre.backend.controller;
 
 import com.theatre.backend.dto.LoginRequest;
 import com.theatre.backend.dto.LoginResponse;
+import com.theatre.backend.dto.MessageResponse;
+import com.theatre.backend.entity.User;
 import com.theatre.backend.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,5 +20,15 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
         return userService.login(request.email(), request.password());
+    }
+
+    @PostMapping("/register")
+    public MessageResponse register(@RequestBody User user) {
+        return userService.register(user);
+    }
+
+    @GetMapping("/verify")
+    public MessageResponse verify(@RequestParam String token) {
+        return userService.verifyEmail(token);
     }
 }
