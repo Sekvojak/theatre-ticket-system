@@ -13,13 +13,18 @@ import java.util.List;
 public class ReservationResponse {
 
     private Long id;
+
     private Long performanceId;
+    private String showTitle;
+    private LocalDateTime performanceStart;
+
     private String status;
     private LocalDateTime createdAt;
 
     private Long userId;
-    private String guestName;
-    private String guestEmail;
+    private String customerName;
+    private String customerEmail;
 
     private List<Long> seatIds;
+    private List<String> seatLabels;
 }

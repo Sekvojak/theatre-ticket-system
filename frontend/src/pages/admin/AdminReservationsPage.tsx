@@ -95,15 +95,22 @@ export default function AdminReservationsPage() {
                 return (
                   <tr key={r.id} className={r.status === 'CANCELED' ? 'admin-tr-canceled' : ''}>
                     <td className="admin-td-id">{r.id}</td>
-                    <td className="admin-td-main">{r.performance?.show?.title ?? '—'}</td>
-                    <td>{r.performance?.startTime ? formatDateTime(r.performance.startTime) : '—'}</td>
+                    <td className="admin-td-main">{r.showTitle ?? '—'}</td>
+                    <td>{r.performanceStart ? formatDateTime(r.performanceStart) : '—'}</td>
                     <td>
-                      {r.user
-                        ? <span className="admin-badge">{r.user.name}</span>
-                        : <span>{r.guestName ?? '—'}<br /><small style={{ color: 'var(--muted)' }}>{r.guestEmail}</small></span>
-                      }
+                      {r.customerName ? (
+                        <span className="admin-badge">{r.customerName}</span>
+                      ) : (
+                        <span>—</span>
+                      )}
+                      {r.customerEmail && (
+                        <>
+                          <br />
+                          <small style={{ color: 'var(--muted)' }}>{r.customerEmail}</small>
+                        </>
+                      )}
                     </td>
-                    <td>{r.seatIds && r.seatIds.length > 0 ? r.seatIds.join(', ') : '—'}</td>
+                    <td>{r.seatLabels && r.seatLabels.length > 0 ? r.seatLabels.join(', ') : '—'}</td>
                     <td>{formatDateTime(r.createdAt)}</td>
                     <td>
                       <span className={`res-status-badge ${r.status.toLowerCase()}`}>

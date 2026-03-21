@@ -289,20 +289,42 @@ public class ReservationService {
 
     public ReservationResponse mapToResponse(Reservation reservation) {
 
-        List<Long> seatIds = ticketRepository.findByReservationId(reservation.getId())
-                .stream()
+        List<Ticket> tickets = ticketRepository.findByReservationId(reservation.getId());
+
+        List<Long> seatIds = tickets.stream()
                 .map(ticket -> ticket.getSeat().getId())
                 .toList();
+
+        List<String> seatLabels = tickets.stream()
+                .map(ticket -> {
+                    Seat seat = ticket.getSeat();
+                    return ((char) ('A' + seat.getRowNumber() - 1)) + String.valueOf(seat.getSeatNumber());
+                })
+                .toList();
+
+        String customerName;
+        String customerEmail;
+
+        if (reservation.getUser() != null) {
+            customerName = reservation.getUser().getName();
+            customerEmail = reservation.getUser().getEmail();
+        } else {
+            customerName = reservation.getGuestName();
+            customerEmail = reservation.getGuestEmail();
+        }
 
         return ReservationResponse.builder()
                 .id(reservation.getId())
                 .performanceId(reservation.getPerformance().getId())
+                .showTitle(reservation.getPerformance().getShow().getTitle())
+                .performanceStart(reservation.getPerformance().getStartTime())
                 .status(reservation.getStatus().name())
                 .createdAt(reservation.getCreatedAt())
                 .userId(reservation.getUser() != null ? reservation.getUser().getId() : null)
-                .guestName(reservation.getGuestName())
-                .guestEmail(reservation.getGuestEmail())
+                .customerName(customerName)
+                .customerEmail(customerEmail)
                 .seatIds(seatIds)
+                .seatLabels(seatLabels)
                 .build();
     }
 
@@ -312,4 +334,22 @@ public class ReservationService {
 
         return mapToResponse(reservation);
     }
+
+    public List<ReservationResponse> getAllReservationResponses() {
+        return reservationRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+
+    public List<ReservationResponse> getReservationResponsesByUserId(Long userId) {
+        return reservationRepository.findByUserId(userId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+
+
 }

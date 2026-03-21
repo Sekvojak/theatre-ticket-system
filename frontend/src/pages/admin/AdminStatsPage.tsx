@@ -27,13 +27,17 @@ function exportCSV(reservations: AdminReservation[], performances: Performance[]
   const rows = [
     ['ID', 'Inscenácia', 'Dátum hrania', 'Zákazník', 'Email', 'Stav', 'Vytvorená'],
     ...reservations.map(r => {
-      const perf = r.performance
+      const perf = perfMap[r.performanceId]
       return [
         r.id,
-        perf?.show?.title ?? '—',
-        perf?.startTime ? new Date(perf.startTime).toLocaleString('sk-SK') : '—',
-        r.user ? r.user.name : (r.guestName ?? '—'),
-        r.user ? r.user.email : (r.guestEmail ?? '—'),
+        r.showTitle ?? perf?.show?.title ?? '—',
+        r.performanceStart
+          ? new Date(r.performanceStart).toLocaleString('sk-SK')
+          : perf?.startTime
+            ? new Date(perf.startTime).toLocaleString('sk-SK')
+            : '—',
+        r.customerName ?? '—',
+        r.customerEmail ?? '—',
         r.status === 'ACTIVE' ? 'Aktívna' : 'Zrušená',
         new Date(r.createdAt).toLocaleString('sk-SK'),
       ]
@@ -248,46 +252,73 @@ function computeStats(
   const activeRes = reservations.filter(r => r.status === 'ACTIVE')
   const canceledRes = reservations.filter(r => r.status === 'CANCELED')
 
-  // Revenue & tickets — from seat prices via hall capacity proxy
-  // We sum seat prices per reservation using seatIds if available
-  // Fallback: count reservations as proxy
-  let totalRevenue = 0
-  let soldTickets = 0
+  const perfMap: Record<number, Performance> = {}
+  performances.forEach(p => { perfMap[p.id] = p })
+
   const seatMap: Record<number, Seat> = {}
   seats.forEach(s => { seatMap[s.id] = s })
 
-  activeRes.forEach(r => {
+  // Rátame tržby a lístky len z aktívnych rezervácií k ukončeným predstaveniam
+  const finishedActiveReservations = activeRes.filter(r => {
+    const perf = perfMap[r.performanceId]
+    return perf?.status === 'FINISHED'
+  })
+
+  let totalRevenue = 0
+  let soldTickets = 0
+
+  finishedActiveReservations.forEach(r => {
     if (r.seatIds && r.seatIds.length > 0) {
       r.seatIds.forEach(sid => {
         const seat = seatMap[sid]
-        if (seat) { totalRevenue += seat.price; soldTickets++ }
+        if (seat) {
+          totalRevenue += seat.price
+          soldTickets++
+        }
       })
     }
   })
 
-  // Avg occupancy per performance
-  const perfSeats: Record<number, number> = {}
+  // Počet miest v sále podľa hall.id
+  const hallSeatCounts: Record<number, number> = {}
   seats.forEach(s => {
-    perfSeats[s.hall.id] = (perfSeats[s.hall.id] ?? 0) + 1
+    hallSeatCounts[s.hall.id] = (hallSeatCounts[s.hall.id] ?? 0) + 1
   })
+
+  // Priemerná obsadenosť len pre ukončené predstavenia
   const occupancies: number[] = []
-  performances.forEach(p => {
-    const total = perfSeats[p.hall.id] ?? 0
-    if (total === 0) return
-    const occupied = activeRes.filter(r => r.performance?.id === p.id).length
-    occupancies.push(Math.min(100, Math.round((occupied / total) * 100)))
-  })
+
+  performances
+    .filter(p => p.status === 'FINISHED')
+    .forEach(p => {
+      const totalSeatsInHall = hallSeatCounts[p.hall.id] ?? 0
+      if (totalSeatsInHall === 0) return
+
+      const occupiedSeats = activeRes
+        .filter(r => r.performanceId === p.id)
+        .reduce((sum, r) => sum + (r.seatIds?.length ?? 0), 0)
+
+      occupancies.push(Math.min(100, Math.round((occupiedSeats / totalSeatsInHall) * 100)))
+    })
+
   const avgOccupancy = occupancies.length > 0
     ? Math.round(occupancies.reduce((a, b) => a + b, 0) / occupancies.length)
     : 0
 
-  // Top shows
+  // Top shows len z ukončených predstavení
   const showStats: Record<number, { reservations: number; tickets: number; revenue: number }> = {}
-  activeRes.forEach(r => {
-    const showId = r.performance?.show?.id
+
+  finishedActiveReservations.forEach(r => {
+    const perf = perfMap[r.performanceId]
+    const showId = perf?.show?.id
     if (!showId) return
-    if (!showStats[showId]) showStats[showId] = { reservations: 0, tickets: 0, revenue: 0 }
+
+    if (!showStats[showId]) {
+      showStats[showId] = { reservations: 0, tickets: 0, revenue: 0 }
+    }
+
     showStats[showId].reservations++
+
     if (r.seatIds) {
       r.seatIds.forEach(sid => {
         showStats[showId].tickets++
@@ -295,40 +326,39 @@ function computeStats(
       })
     }
   })
+
   const topShows = shows
     .filter(s => showStats[s.id])
     .map(s => ({ show: s, ...showStats[s.id] }))
     .sort((a, b) => b.reservations - a.reservations)
     .slice(0, 5)
 
-  // Genre breakdown
   const genreCounts: Record<string, number> = {}
   shows.forEach(s => s.genres.forEach(g => { genreCounts[g] = (genreCounts[g] ?? 0) + 1 }))
+
   const totalShows = shows.length || 1
   const genreBreakdown = Object.entries(genreCounts)
     .map(([genre, count]) => ({ genre, count, pct: Math.round((count / totalShows) * 100) }))
     .sort((a, b) => b.count - a.count)
 
-  // Perf status
   const perfStatus = {
     scheduled: performances.filter(p => p.status === 'SCHEDULED').length,
     finished: performances.filter(p => p.status === 'FINISHED').length,
     canceled: performances.filter(p => p.status === 'CANCELED').length,
   }
 
-  // Customer ratio
   const customerRatio = {
-    users: reservations.filter(r => r.user != null).length,
-    guests: reservations.filter(r => r.user == null).length,
+    users: reservations.filter(r => r.userId != null).length,
+    guests: reservations.filter(r => r.userId == null).length,
   }
 
-  // Activity by month (last 6 months)
   const monthCounts: Record<string, number> = {}
   reservations.forEach(r => {
     const d = new Date(r.createdAt)
     const key = d.toLocaleString('sk-SK', { month: 'short', year: '2-digit' })
     monthCounts[key] = (monthCounts[key] ?? 0) + 1
   })
+
   const recentActivity = Object.entries(monthCounts)
     .map(([month, count]) => ({ month, count }))
     .slice(-6)

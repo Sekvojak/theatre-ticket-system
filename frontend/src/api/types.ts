@@ -87,13 +87,16 @@ export interface UserReservation {
   guestEmail?: string;
 }
 
-export interface AdminReservation {
-  id: number;
-  performance: Performance;
-  user?: User;
-  guestName?: string;
-  guestEmail?: string;
-  status: 'ACTIVE' | 'CANCELED';
-  createdAt: string;
-  seatIds?: number[];
+export type AdminReservation = {
+  id: number
+  performanceId: number
+  showTitle?: string | null
+  performanceStart?: string | null
+  status: 'ACTIVE' | 'CANCELED'
+  createdAt: string
+  userId?: number | null
+  customerName?: string | null
+  customerEmail?: string | null
+  seatIds?: number[]
+  seatLabels?: string[]
 }

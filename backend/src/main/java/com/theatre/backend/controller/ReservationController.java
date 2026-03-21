@@ -20,8 +20,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<Reservation> getAllReservations() {
-        return reservationService.getAllReservations();
+    public List<ReservationResponse> getAllReservations() {
+        return reservationService.getAllReservationResponses();
     }
 
     @PostMapping
